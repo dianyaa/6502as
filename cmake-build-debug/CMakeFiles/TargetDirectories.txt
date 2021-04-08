@@ -1,0 +1,3 @@
+C:/Users/Diana/CLionProjects/6502as/cmake-build-debug/CMakeFiles/6502as.dir
+C:/Users/Diana/CLionProjects/6502as/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Diana/CLionProjects/6502as/cmake-build-debug/CMakeFiles/rebuild_cache.dir
