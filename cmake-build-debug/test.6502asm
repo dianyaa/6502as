@@ -1,22 +1,8 @@
-4240:
-LDX #$03
-LDA ($10),X
-LDA $10
+## Sample 6502 asm file
+## Adds 0x20 to 0xF and stores result at $1F01
 
-RTS
-
-6969:
-LDX #$40
-STX $1223
-LDX #$42
-STX $1224
-LDX #$10
-STX $10
-STX $11
-LDX #$80
-STX $1014
-JMP ($1223)
-
-FFFC:
-JSR $6969
-JSR $F6F8
+LDX #$20
+STX $1F00
+LDA #$F
+ADC $1F00
+STA $1F01
