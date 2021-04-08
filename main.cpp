@@ -1,7 +1,7 @@
 // 6502as, a pretty garbage assembler for 6502
 // Created by: Dianya~~
 // Created on: 4/8/2021
-// github.com/dianyaa/6502as [soon]
+// github.com/dianyaa/6502as
 #include <iostream>
 #include <fstream>
 #include <algorithm>
