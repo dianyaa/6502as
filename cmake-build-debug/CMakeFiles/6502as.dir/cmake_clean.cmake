@@ -1,7 +1,9 @@
 file(REMOVE_RECURSE
-  "6502as"
+  "6502as.exe"
+  "6502as.exe.manifest"
   "6502as.pdb"
-  "CMakeFiles/6502as.dir/main.cpp.o"
+  "CMakeFiles/6502as.dir/main.cpp.obj"
+  "lib6502as.dll.a"
 )
 
 # Per-language clean rules from dependency scanning.
