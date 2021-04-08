@@ -130,7 +130,7 @@ void assemble( string instruction, string param, ofstream &outfile, int linecoun
 
 int main(int argc, char* argv[] ){
     if ( argc <= 1 ){
-        puts( "Usage: b6502as [OPTIONS] FILE\n" );
+        puts( "Usage: 6502as [OPTIONS] FILE\n" );
         fflush( stdout );
         exit( 1 );
     }
@@ -138,7 +138,7 @@ int main(int argc, char* argv[] ){
     for ( int i = 0; i < argc; i++ ){
         string s1(argv[i]);
         if ( s1.find("-h") != std::string::npos || s1.find("--help") != std::string::npos ){
-            puts( "Usage: b6502as [OPTIONS] FILE\n" );
+            puts( "Usage: 6502as [OPTIONS] FILE\n" );
             puts( "FILE is any valid 6502 assembly file\n" );
             puts( " --help, -h         Displays this message\n" );
             puts( " --verbose, -v      Enables verbose output\n" );
