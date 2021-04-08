@@ -247,7 +247,7 @@ int main(int argc, char* argv[] ){
             cout << "Parameter        : " + param + "\n";
             cout << "Hex Param        : " + hexParamStream.str() + "\n";
             cout << "Addressing Mode  : " + addr_mode + "\n";
-            cout << "Full Instruction : " + fullIns + "\n";
+            cout << "Full Instruction : " + fullIns + "\n\n";
         }
 
         //Actually turn the mnemonic and param into machine code (hopefully with no mistakes >_<)
