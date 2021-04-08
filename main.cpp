@@ -153,7 +153,7 @@ int main(int argc, char* argv[] ){
 
     //File: the input file name
     ifstream File;
-    File.open( argv[1] );
+    File.open( argv[argc-1] );
     //OutFile: the output file name
     ofstream OutFile;
     OutFile.rdbuf()->pubsetbuf( nullptr,0 );
