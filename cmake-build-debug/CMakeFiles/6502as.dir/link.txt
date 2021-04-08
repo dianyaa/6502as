@@ -1,3 +1,0 @@
-C:\Users\Diana\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f CMakeFiles\6502as.dir/objects.a
-C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\ar.exe cr CMakeFiles\6502as.dir/objects.a @CMakeFiles\6502as.dir\objects1.rsp
-C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\6502as.dir/objects.a -Wl,--no-whole-archive  -o 6502as.exe -Wl,--out-implib,lib6502as.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\6502as.dir\linklibs.rsp
