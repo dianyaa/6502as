@@ -9,6 +9,7 @@
 #include <regex>
 #include <unordered_map>
 #include <sstream>
+#include <ctime>
 
 using namespace std;
 
@@ -130,35 +131,24 @@ void assemble( string instruction, string param, ofstream &outfile, int linecoun
 }
 
 int main(int argc, char* argv[] ){
+    time_t timestart = time(nullptr);
     if ( argc <= 1 ){
         puts( "Usage: 6502as [OPTIONS] FILE\n" );
         fflush( stdout );
         exit( 1 );
     }
     bool debug = false;
-    bool memmode = false;
     for ( int i = 0; i < argc; i++ ){
         string s1(argv[i]);
-        if ( s1.find( "-h" ) != std::string::npos || s1.find( "--help" ) != std::string::npos ){
+        if ( s1.find("-h") != std::string::npos || s1.find("--help") != std::string::npos ){
             puts( "Usage: 6502as [OPTIONS] FILE\n" );
             puts( "FILE is any valid 6502 assembly file\n" );
             puts( " --help, -h         Displays this message\n" );
             puts( " --verbose, -v      Enables verbose output\n" );
-            puts( " --memory, -m       Outputs the binary as a 6502 memory dump with the reset vector (at 0xFFFC) set to\n"
-                  "                    the position of your program\n" );
-            puts( " --entry, -e        For use with --memory, will specify where in the memory dump you would like the\n"
-                  "                    program to start (in range 0x0000 to 0xFFFA) " );
             exit( 0 );
         }
-        else if ( s1.find( "-v" ) != std::string::npos || s1.find( "--verbose" ) != std::string::npos )
+        else if ( s1.find("-v") != std::string::npos || s1.find("--verbose") != std::string::npos )
             debug = true;
-        else if ( s1.find( "-m" ) != std::string::npos || s1.find( "--memory" ) != std::string::npos )
-            memmode = true;
-        else if ( s1.find( "-e" ) != std::string::npos || s1.find( "--entry" ) != std::string::npos )
-            if ( !memmode ){
-                printf( "%s must only be used with --memory/-m\n", s1.c_str() );
-                exit( 1 );
-            }
     }
 
     //Set-up vars:
@@ -166,6 +156,10 @@ int main(int argc, char* argv[] ){
     //File: the input file name
     ifstream File;
     File.open( argv[argc-1] );
+    if(File.fail()){
+        printf("Error: File %s does not exist\nExiting", argv[argc-1]);
+        exit(3);
+    }
     //OutFile: the output file name
     ofstream OutFile;
     OutFile.rdbuf()->pubsetbuf( nullptr,0 );
@@ -212,23 +206,21 @@ int main(int argc, char* argv[] ){
         param = "";
 
         //Get the instruction and params from the string using the format: [3 letter ins] [whitespace] [param]
-        while ( pos <= line.length() ){
-            //instruction
-            while ( pos <= 3 ){
-                instruction += line[pos];
-                pos++;
-            }
+        //instruction
+        while ( pos <= 3 ){
+            instruction += line[pos];
+            pos++;
+        }
 
-            //skip whitespace
-            while ( isspace( line[pos] ) && pos <= line.length() ){
-                pos++;
-            }
+        //skip whitespace
+        while ( isspace( line[pos] ) && pos < line.length() ){
+            pos++;
+        }
 
-            //param
-            while ( !isspace( line[pos] ) && pos <= line.length() ){
-                param += line[pos];
-                pos++;
-            }
+        //param
+        while ( !isspace( line[pos] ) && pos < line.length() ){
+            param += line[pos];
+            pos++;
         }
 
         if ( param.empty() )
@@ -271,15 +263,8 @@ int main(int argc, char* argv[] ){
 
     }
 
-    if ( memmode ){
-        OutFile.seekp( 0xFFFC );
-        char zero = 0x00;
-        OutFile.write( &zero, sizeof(zero) );
-        OutFile.write( &zero, sizeof(zero) );
-        OutFile.write( &zero, sizeof(zero) );
-        OutFile.write( &zero, sizeof(zero) );
-    }
-
     cout << "Done, nya~\n";
+    time_t timetotal = time(nullptr) - timestart;
+    cout << "Time End: " + to_string(timetotal) + "\n";
     return 0;
 }
