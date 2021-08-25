@@ -4,3 +4,4 @@ project(6502as)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(6502as main.cpp)
+include_directories(./include)

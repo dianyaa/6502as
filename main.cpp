@@ -10,10 +10,10 @@
 #include <unordered_map>
 #include <sstream>
 #include <ctime>
+#include <tclap/CmdLine.h>
 
-using namespace std;
 
-std::unordered_map<string, char> opcodes = {
+std::unordered_map<std::string, char> opcodes = {
         {"ADCIM", 0x69}, {"ADCZP", 0x65}, {"ADCZPX", 0x75}, {"ADCAB", 0x6D},
         {"ADCABX", 0x7D}, {"ADCABY", 0x79}, {"ADCINX", 0x61}, {"ADCINY", 0x71},
         {"ANDIM", 0x29}, {"ANDZP", 0x25}, {"ANDZPX", 0x35}, {"ANDAB", 0x2D},
@@ -52,7 +52,7 @@ std::unordered_map<string, char> opcodes = {
         {"TXS", 0x9A}, {"TYA", 0x98}
 };
 
-string determineAddressingMode( const string& param ) {
+std::string determineAddressingMode( const std::string& param ) {
     //Implied - No Suffix
     if ( param == "None" )
         return {};
@@ -60,35 +60,35 @@ string determineAddressingMode( const string& param ) {
     if ( param == "A" || param == "a" )
         return "A";
     //Immediate - "IM" Suffix
-    if ( param.find( '#' ) != string::npos )
+    if ( param.find( '#' ) != std::string::npos )
         return "IM";
-    if ( param.find('*') != string::npos )
+    if ( param.find('*') != std::string::npos )
         return "R";
 
     //Everything past this point uses addresses, so lets extract the address from the param.
-    string address = regex_replace( param, regex( "[^0-9A-F]*([0-9A-F]+).*" ), string( "$1" ));
+    std::string address = std::regex_replace( param, std::regex( "[^0-9A-F]*([0-9A-F]+).*" ), std::string( "$1" ));
 
     //Zero Page - "ZP[X/Y]" Suffix
     if ( address.length() == 2 ) {
-        if ( param.find( 'X' ) != string::npos || param.find( 'x' ) != string::npos )
+        if ( param.find( 'X' ) != std::string::npos || param.find( 'x' ) != std::string::npos )
             return "ZPX";
-        if ( param.find( 'Y' ) != string::npos || param.find( 'y' ) != string::npos )
+        if ( param.find( 'Y' ) != std::string::npos || param.find( 'y' ) != std::string::npos )
             return "ZPY";
         return "ZP";
     }
     //Absolute - "AB[X/Y]" Suffix
-    if ( address.length() == 4 && param.find( '(' ) == string::npos ) {
-        if ( param.find( 'X' ) != string::npos || param.find( 'x' ) != string::npos )
+    if ( address.length() == 4 && param.find( '(' ) == std::string::npos ) {
+        if ( param.find( 'X' ) != std::string::npos || param.find( 'x' ) != std::string::npos )
             return "ABX";
-        if ( param.find( 'Y' ) != string::npos || param.find( 'y' ) != string::npos )
+        if ( param.find( 'Y' ) != std::string::npos || param.find( 'y' ) != std::string::npos )
             return "ABY";
         return "AB";
     }
     //Indirect - "IN[X/Y]" Suffix
-    if ( param.find( '(' ) != string::npos ) {
-        if ( param.find( 'X' ) != string::npos || param.find( 'x' ) != string::npos )
+    if ( param.find( '(' ) != std::string::npos ) {
+        if ( param.find( 'X' ) != std::string::npos || param.find( 'x' ) != std::string::npos )
             return "INX";
-        if ( param.find( 'Y' ) != string::npos || param.find( 'y' ) != string::npos )
+        if ( param.find( 'Y' ) != std::string::npos || param.find( 'y' ) != std::string::npos )
             return "INY";
         return "IN";
     }
@@ -97,27 +97,27 @@ string determineAddressingMode( const string& param ) {
 
 }
 
-string getNormalizedParam(string param ) {
+std::string getNormalizedParam(std::string param ) {
     if ( param == "None" )
         return param;
-    string address = regex_replace( param, regex( "[^0-9A-F]*([0-9A-F]+).*" ), string( "$1" ));
-    if ( param.find( '$' ) != string::npos ) {
-        return to_string( strtol( address.c_str(), nullptr, 16 ) );
+    std::string address = std::regex_replace( param, std::regex( "[^0-9A-F]*([0-9A-F]+).*" ), std::string( "$1" ));
+    if ( param.find( '$' ) != std::string::npos ) {
+        return std::to_string( strtol( address.c_str(), nullptr, 16 ) );
     }
     else
-        return to_string( strtol( address.c_str(), nullptr, 10 ) );
+        return std::to_string( strtol( address.c_str(), nullptr, 10 ) );
 }
 
-void assemble( string instruction, string param, ofstream &outfile, int linecount ) {
-    if ( opcodes[instruction] == 0x00 && instruction.find("BRK") == string::npos && param != "None" ) {
-        cout << "Error: Invalid Instruction/Operand at line: " + to_string(linecount) + "\n";
+void assemble( std::string instruction, std::string param, std::ofstream &outfile, int linecount ) {
+    if ( opcodes[instruction] == 0x00 && instruction.find("BRK") == std::string::npos && param != "None" ) {
+        std::cout << "Error: Invalid Instruction/Operand at line: " + std::to_string(linecount) + "\n";
         exit(3);
     }
     char outcode = opcodes[instruction];
     outfile.write( &outcode, sizeof(outcode) );
     if ( param == "None" )
         return;
-    string normalized_param = getNormalizedParam(param);
+    std::string normalized_param = getNormalizedParam(param);
     int addr_num = strtol( normalized_param.c_str(), nullptr, 10 );
     if ( normalized_param.length() > 2 ){
         char upper = ( addr_num >> 8 );
@@ -131,140 +131,141 @@ void assemble( string instruction, string param, ofstream &outfile, int linecoun
 }
 
 int main(int argc, char* argv[] ){
-    time_t timestart = time(nullptr);
-    if ( argc <= 1 ){
-        puts( "Usage: 6502as [OPTIONS] FILE\n" );
-        fflush( stdout );
-        exit( 1 );
-    }
-    bool debug = false;
-    for ( int i = 0; i < argc; i++ ){
-        string s1(argv[i]);
-        if ( s1.find("-h") != std::string::npos || s1.find("--help") != std::string::npos ){
-            puts( "Usage: 6502as [OPTIONS] FILE\n" );
-            puts( "FILE is any valid 6502 assembly file\n" );
-            puts( " --help, -h         Displays this message\n" );
-            puts( " --verbose, -v      Enables verbose output\n" );
-            exit( 0 );
+    try {
+        time_t timestart = time( nullptr );
+        bool debug;
+        std::string input;
+        std::string output;
+        TCLAP::CmdLine cmdLine( "6502as", ' ', "0.2a" );
+
+        TCLAP::SwitchArg debugSwitch("v", "verbose", "Prints information while assembling file", cmdLine, false);
+        TCLAP::ValueArg<std::string> outputPath("o", "output", "Specifies output filename, default is \"a.out6502\"", false, "a.out6502", "filename");
+        TCLAP::UnlabeledValueArg<std::string> inputPath("input", "Input file filename", true, "", "filename");
+        cmdLine.add( outputPath );
+        cmdLine.add( inputPath );
+        cmdLine.parse( argc, argv );
+
+        debug = debugSwitch.getValue();
+        input = inputPath.getValue();
+        output = outputPath.getValue();
+
+        //Set-up vars:
+
+        //File: the input file name
+        std::ifstream File;
+        File.open( input );
+        if(File.fail()){
+            printf("Error: File %s does not exist\nExiting", argv[argc-1]);
+            exit(3);
         }
-        else if ( s1.find("-v") != std::string::npos || s1.find("--verbose") != std::string::npos )
-            debug = true;
-    }
+        //OutFile: the output file name
+        std::ofstream OutFile;
+        OutFile.rdbuf()->pubsetbuf( nullptr,0 );
+        OutFile.open( output, std::ios::binary | std::ios::out );
+        //line: the current line buffer
+        std::string line;
+        //linecount: the number of lines since the beginning of the file (for error reporting)
+        int linecount = 1;
+        //pos: the current position in the current line
+        int pos;
+        //instruction: std::string that will hold the instruction after being extracted from the line std::string
+        std::string instruction;
+        //param: std::string that will hold the parameter after being extracted from the line std::string
+        std::string param;
 
-    //Set-up vars:
+        while ( getline( File, line ) ){
 
-    //File: the input file name
-    ifstream File;
-    File.open( argv[argc-1] );
-    if(File.fail()){
-        printf("Error: File %s does not exist\nExiting", argv[argc-1]);
-        exit(3);
-    }
-    //OutFile: the output file name
-    ofstream OutFile;
-    OutFile.rdbuf()->pubsetbuf( nullptr,0 );
-    OutFile.open( "a.out6502", ios::binary | ios::out );
-    //line: the current line buffer
-    string line;
-    //linecount: the number of lines since the beginning of the file (for error reporting)
-    int linecount = 1;
-    //pos: the current position in the current line
-    int pos;
-    //instruction: string that will hold the instruction after being extracted from the line string
-    string instruction;
-    //param: string that will hold the parameter after being extracted from the line string
-    string param;
+            //Make sure there is no whitespace
+            if ( all_of( line.begin(), line.end(), ::isspace ) ){
+                if ( debug )
+                    std::cout << "skip whitespace only at line: " + std::to_string( linecount ) + "\n\n";
+                linecount++;
+                continue;
+            }
 
-    while ( getline( File, line ) ){
+            //We are ignoring labels for now
+            //TODO: add label support
+            if ( line.back() == ':' ){
+                if ( debug )
+                    std::cout << "skipping label at line: " + std::to_string( linecount ) + "\n\n";
+                linecount++;
+                continue;
+            }
 
-        //Make sure there is no whitespace
-        if ( all_of( line.begin(), line.end(), ::isspace ) ){
-            if ( debug )
-                cout << "skip whitespace only at line: " + to_string( linecount ) + "\n\n";
+            //Skip comments (starts with ;)
+            if ( line.front() == ';' ){
+                linecount++;
+                continue;
+            }
+
+            //Set-up variables for getting ins and param from the std::string
+            pos = 0;
+            instruction = "";
+            param = "";
+
+            //Get the instruction and params from the std::string using the format: [3 letter ins] [whitespace] [param]
+            //instruction
+            while ( pos <= 3 ){
+                instruction += line[pos];
+                pos++;
+            }
+
+            //skip whitespace
+            while ( isspace( line[pos] ) && pos < line.length() ){
+                pos++;
+            }
+
+            //param
+            while ( !isspace( line[pos] ) && pos < line.length() ){
+                param += line[pos];
+                pos++;
+            }
+
+            if ( param.empty() )
+                param = "None";
+
+            //6502 has 13 different addressing modes which must be known for the correct opcode to be selected
+            std::string addr_mode = determineAddressingMode( param );
+            if ( addr_mode.find( "Error" ) != std::string::npos ){
+                std::cout << addr_mode + "\n";
+                std::cout << "Found at line: " + std::to_string( linecount ) + "\n";
+                exit(2);
+            }
+
+            //All parameters must be normalized for the final assembly step
+            std::string normalized_param = getNormalizedParam(param);
+            std::string fullIns;
+            fullIns += instruction;
+            fullIns += addr_mode;
+            fullIns.erase(remove_if(fullIns.begin(), fullIns.end(), ::isspace), fullIns.end());
+            std::stringstream hexParamStream;
+            hexParamStream << std::hex << strtol( normalized_param.c_str(), nullptr, 10 );
+
+
+            //Informational Output
+            if ( debug ) {
+                std::cout << "Instruction      : " + instruction + "\n";
+                std::cout << "Parameter        : " + param + "\n";
+                std::cout << "Hex Param        : " + hexParamStream.str() + "\n";
+                std::cout << "Addressing Mode  : " + addr_mode + "\n";
+                std::cout << "Full Instruction : " + fullIns + "\n\n";
+            }
+
+            //Actually turn the mnemonic and param into machine code (hopefully with no mistakes >_<)
+            assemble( fullIns, param, OutFile, linecount );
+
+            //We want to increment linecount after we assemble so that in case something goes wrong,
+            //we will report the correct line number.
             linecount++;
-            continue;
         }
 
-        //We are ignoring labels for now
-        //TODO: add label support
-        if ( line.back() == ':' ){
-            if ( debug )
-                cout << "skipping label at line: " + to_string( linecount ) + "\n\n";
-            linecount++;
-            continue;
-        }
 
-        //Skip comments (starts with #)
-        if ( line.front() == '#' ){
-            linecount++;
-            continue;
-        }
-
-        //Set-up variables for getting ins and param from the string
-        pos = 0;
-        instruction = "";
-        param = "";
-
-        //Get the instruction and params from the string using the format: [3 letter ins] [whitespace] [param]
-        //instruction
-        while ( pos <= 3 ){
-            instruction += line[pos];
-            pos++;
-        }
-
-        //skip whitespace
-        while ( isspace( line[pos] ) && pos < line.length() ){
-            pos++;
-        }
-
-        //param
-        while ( !isspace( line[pos] ) && pos < line.length() ){
-            param += line[pos];
-            pos++;
-        }
-
-        if ( param.empty() )
-            param = "None";
-
-        //6502 has 13 different addressing modes which must be known for the correct opcode to be selected
-        string addr_mode = determineAddressingMode( param );
-        if ( addr_mode.find( "Error" ) != string::npos ){
-            cout << addr_mode + "\n";
-            cout << "Found at line: " + to_string( linecount ) + "\n";
-            exit(2);
-        }
-
-        //All parameters must be normalized for the final assembly step
-        string normalized_param = getNormalizedParam(param);
-        string fullIns;
-        fullIns += instruction;
-        fullIns += addr_mode;
-        fullIns.erase(remove_if(fullIns.begin(), fullIns.end(), ::isspace), fullIns.end());
-        stringstream hexParamStream;
-        hexParamStream << hex << strtol( normalized_param.c_str(), nullptr, 10 );
-
-
-        //Informational Output
-        //TODO: make informational output toggleable
-        if ( debug ) {
-            cout << "Instruction      : " + instruction + "\n";
-            cout << "Parameter        : " + param + "\n";
-            cout << "Hex Param        : " + hexParamStream.str() + "\n";
-            cout << "Addressing Mode  : " + addr_mode + "\n";
-            cout << "Full Instruction : " + fullIns + "\n\n";
-        }
-
-        //Actually turn the mnemonic and param into machine code (hopefully with no mistakes >_<)
-        assemble( fullIns, param, OutFile, linecount );
-
-        //We want to increment linecount after we assemble so that in case something goes wrong,
-        //we will report the correct line number.
-        linecount++;
-
+        std::cout << "Done, nya~\n";
+        time_t timetotal = time(nullptr) - timestart;
+        std::cout << "Time End: " + std::to_string(timetotal) + "\n";
+        return 0;
     }
-
-    cout << "Done, nya~\n";
-    time_t timetotal = time(nullptr) - timestart;
-    cout << "Time End: " + to_string(timetotal) + "\n";
-    return 0;
+    catch( TCLAP::ArgException &e ){
+        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+    }
 }

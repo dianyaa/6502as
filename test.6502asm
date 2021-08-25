@@ -1,8 +1,4 @@
-## Sample 6502 asm file
-## Adds 0x20 to 0xF and stores result at $1F01
-
-LDX #$20
-STX $1F00
-LDA #$F
-ADC $1F00
-STA $1F01
+LDA #$20
+ADC #$10
+STA $2000
+LDX $2000
