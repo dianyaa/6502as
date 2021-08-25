@@ -11,7 +11,7 @@
 #include <sstream>
 #include <ctime>
 #include <tclap/CmdLine.h>
-
+#define MEM6502_SIZE 1024*64 + 1
 
 std::unordered_map<std::string, char> opcodes = {
         {"ADCIM", 0x69}, {"ADCZP", 0x65}, {"ADCZPX", 0x75}, {"ADCAB", 0x6D},
@@ -160,8 +160,9 @@ int main(int argc, char* argv[] ){
         }
         //OutFile: the output file name
         std::ofstream OutFile;
-        OutFile.rdbuf()->pubsetbuf( nullptr,0 );
+        char buf[MEM6502_SIZE];
         OutFile.open( output, std::ios::binary | std::ios::out );
+        OutFile.rdbuf()->pubsetbuf( buf, sizeof buf );
         //line: the current line buffer
         std::string line;
         //linecount: the number of lines since the beginning of the file (for error reporting)
